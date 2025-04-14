@@ -1,0 +1,129 @@
+from rest_framework import viewsets, permissions, status
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from django.contrib.auth.models import User
+from .models import Componente, MenuItem, Estado, Mesa, Cliente, Pedido, Orden
+from .serializers import (
+    UserSerializer,
+    ComponenteSerializer, 
+    MenuItemSerializer, 
+    MenuItemDetailSerializer,
+    EstadoSerializer, 
+    MesaSerializer, 
+    ClienteSerializer, 
+    PedidoSerializer, 
+    PedidoDetailSerializer,
+    OrdenSerializer,
+    OrdenDetailSerializer
+)
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        # Si es superusuario puede ver todos los usuarios
+        if self.request.user.is_superuser:
+            return User.objects.all()
+        # Si no, solo puede ver su propio perfil
+        return User.objects.filter(id=self.request.user.id)
+
+class ComponenteViewSet(viewsets.ModelViewSet):
+    queryset = Componente.objects.all()
+    serializer_class = ComponenteSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class MenuItemViewSet(viewsets.ModelViewSet):
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return MenuItemDetailSerializer
+        return MenuItemSerializer
+    
+    @action(detail=True, methods=['post'])
+    def add_componente(self, request, pk=None):
+        menu_item = self.get_object()
+        componente_id = request.data.get('componente_id')
+        try:
+            componente = Componente.objects.get(id=componente_id)
+            menu_item.componentes.add(componente)
+            return Response({'status': 'componente added'})
+        except Componente.DoesNotExist:
+            return Response({'error': 'Componente not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+    @action(detail=True, methods=['post'])
+    def remove_componente(self, request, pk=None):
+        menu_item = self.get_object()
+        componente_id = request.data.get('componente_id')
+        try:
+            componente = Componente.objects.get(id=componente_id)
+            menu_item.componentes.remove(componente)
+            return Response({'status': 'componente removed'})
+        except Componente.DoesNotExist:
+            return Response({'error': 'Componente not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class EstadoViewSet(viewsets.ModelViewSet):
+    queryset = Estado.objects.all()
+    serializer_class = EstadoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class MesaViewSet(viewsets.ModelViewSet):
+    queryset = Mesa.objects.all()
+    serializer_class = MesaSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class ClienteViewSet(viewsets.ModelViewSet):
+    queryset = Cliente.objects.all()
+    serializer_class = ClienteSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+class PedidoViewSet(viewsets.ModelViewSet):
+    queryset = Pedido.objects.all()
+    serializer_class = PedidoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return PedidoDetailSerializer
+        return PedidoSerializer
+    
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)
+    
+    @action(detail=True, methods=['post'])
+    def calcular_total(self, request, pk=None):
+        pedido = self.get_object()
+        pedido.calcular_total()
+        return Response({'status': 'total calculado', 'subtotal': pedido.subtotal, 'total': pedido.total})
+    
+    @action(detail=False, methods=['get'])
+    def mis_pedidos(self, request):
+        pedidos = Pedido.objects.filter(usuario=request.user)
+        serializer = PedidoSerializer(pedidos, many=True)
+        return Response(serializer.data)
+
+class OrdenViewSet(viewsets.ModelViewSet):
+    queryset = Orden.objects.all()
+    serializer_class = OrdenSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return OrdenDetailSerializer
+        return OrdenSerializer
+    
+    @action(detail=True, methods=['post'])
+    def cambiar_estado(self, request, pk=None):
+        orden = self.get_object()
+        estado_id = request.data.get('estado_id')
+        try:
+            estado = Estado.objects.get(id=estado_id)
+            orden.estado = estado
+            orden.save()
+            return Response({'status': 'estado actualizado'})
+        except Estado.DoesNotExist:
+            return Response({'error': 'Estado not found'}, status=status.HTTP_404_NOT_FOUND)
