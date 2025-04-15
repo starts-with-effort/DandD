@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import LoginForm from '../../components/auth/LoginForm';
-import { isAuthenticated } from '@/lib/auth';
+import { isAuthenticated, getRedirectPath } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,7 +11,8 @@ export default function LoginPage() {
   useEffect(() => {
     // Redirigir si ya está autenticado
     if (typeof window !== 'undefined' && isAuthenticated()) {
-      router.push('/dashboard');
+      const redirectPath = getRedirectPath();
+      router.push(redirectPath);
     }
   }, [router]);
 

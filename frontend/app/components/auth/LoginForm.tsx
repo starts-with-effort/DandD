@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { login } from '@/lib/auth';
+import { login, getRedirectPath } from '@/lib/auth';
 
 interface LoginFormInputs {
   username: string;
@@ -29,7 +29,9 @@ export default function LoginForm() {
       const success = await login(data);
       
       if (success) {
-        router.push('/dashboard');
+        // Determinar a dónde redirigir según el grupo del usuario
+        const redirectPath = getRedirectPath();
+        router.push(redirectPath);
       } else {
         setError('Credenciales inválidas. Por favor, inténtalo de nuevo.');
       }

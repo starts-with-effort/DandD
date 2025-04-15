@@ -1,12 +1,8 @@
-# urls.py (proyecto)
-from django.contrib import admin
-from django.urls import path, include
-
-# restaurante/urls.py (app)
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
     UserViewSet,
+    GroupViewSet,
     ComponenteViewSet,
     MenuItemViewSet,
     EstadoViewSet,
@@ -18,6 +14,7 @@ from .views import (
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
+router.register(r'groups', GroupViewSet)
 router.register(r'componentes', ComponenteViewSet)
 router.register(r'menu-items', MenuItemViewSet)
 router.register(r'estados', EstadoViewSet)
@@ -28,4 +25,5 @@ router.register(r'ordenes', OrdenViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    path('users/me/', UserViewSet.as_view({'get': 'me'}), name='user-info'),
 ]

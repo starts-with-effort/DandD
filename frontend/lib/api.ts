@@ -1,8 +1,8 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { refreshToken, logout } from './auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-console.log('API URL:', API_URL); // Añade esta línea para depurar
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/';
+console.log('API URL:', API_URL);
 // Definir el prefijo de la API para todos los endpoints
 const API_PREFIX = 'core';
 
@@ -15,10 +15,24 @@ const api = axios.create({
   withCredentials: true,  // Importante para CORS con credenciales
 });
 
+let isRefreshing = false;
+let failedQueue: {resolve: (value: unknown) => void; reject: (reason?: any) => void}[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
 // Interceptor para agregar el token a las solicitudes
 api.interceptors.request.use(
   (config) => {
-    console.log('Request config:', config);
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -26,12 +40,11 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('Request error:', error);
     return Promise.reject(error);
   }
 );
 
-// Interceptor para manejar respuestas y tokens expirados
+// Interceptor mejorado para manejar respuestas y tokens expirados
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -39,17 +52,45 @@ api.interceptors.response.use(
 
     // Si el error es 401 (Unauthorized) y no hemos intentado renovar el token
     if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
-      const newToken = await refreshToken();
-      
-      if (newToken) {
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        return api(originalRequest);
-      } else {
-        logout();
-        return Promise.reject(error);
+      if (isRefreshing) {
+        // Si ya se está refrescando, agregue esta solicitud a la cola
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
       }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+      
+      return new Promise((resolve, reject) => {
+        refreshToken()
+          .then(newToken => {
+            if (newToken) {
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
+              processQueue(null, newToken);
+              resolve(api(originalRequest));
+            } else {
+              processQueue(new Error('Failed to refresh token'), null);
+              logout();
+              reject(error);
+            }
+          })
+          .catch(refreshError => {
+            processQueue(refreshError, null);
+            logout();
+            reject(refreshError);
+          })
+          .finally(() => {
+            isRefreshing = false;
+          });
+      });
     }
     
     return Promise.reject(error);

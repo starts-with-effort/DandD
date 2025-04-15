@@ -1,12 +1,66 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User, Group
 from .models import Componente, MenuItem, Estado, Mesa, Cliente, Pedido, Orden
-from django.contrib.auth.models import User
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ['id', 'name']
 
 class UserSerializer(serializers.ModelSerializer):
+    grupos = serializers.SerializerMethodField()
+    password = serializers.CharField(write_only=True, required=False)
+    groups = serializers.PrimaryKeyRelatedField(
+        queryset=Group.objects.all(), 
+        many=True, 
+        required=False
+    )
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
-        read_only_fields = ['id']
+        fields = ['id', 'username', 'email', 'password', 
+                 'first_name', 'last_name', 'is_active', 
+                 'groups', 'grupos']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+    
+    def get_grupos(self, obj):
+        return [group.name for group in obj.groups.all()]
+    
+    def create(self, validated_data):
+        groups = validated_data.pop('groups', [])
+        password = validated_data.pop('password', None)
+        
+        user = User.objects.create(**validated_data)
+        
+        if password:
+            user.set_password(password)
+        
+        if groups:
+            user.groups.set(groups)
+        
+        user.save()
+        return user
+    
+    def update(self, instance, validated_data):
+        groups = validated_data.pop('groups', None)
+        password = validated_data.pop('password', None)
+        
+        # Actualizar campos básicos
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        # Actualizar contraseña si se proporciona
+        if password:
+            instance.set_password(password)
+        
+        # Actualizar grupos si se proporcionan
+        if groups is not None:
+            instance.groups.set(groups)
+        
+        instance.save()
+        return instance
 
 class ComponenteSerializer(serializers.ModelSerializer):
     class Meta:
