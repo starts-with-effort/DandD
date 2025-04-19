@@ -46,7 +46,7 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Iniciar Sesión</h1>
+        <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">Iniciar Sesión</h1>
         
         {error && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
@@ -62,7 +62,7 @@ export default function LoginForm() {
             <input
               id="username"
               type="text"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
               {...register('username', { required: 'El nombre de usuario es requerido' })}
             />
             {errors.username && (
@@ -77,7 +77,7 @@ export default function LoginForm() {
             <input
               id="password"
               type="password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
               {...register('password', { required: 'La contraseña es requerida' })}
             />
             {errors.password && (

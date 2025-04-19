@@ -7,57 +7,81 @@ import { getUserInfo, logout, isInGroup } from '@/lib/auth';
 export default function Navbar() {
   const router = useRouter();
   const userInfo = getUserInfo();
-  
+
   const handleLogout = () => {
     logout();
     router.push('/auth/login');
   };
 
   // Determinar qué enlaces mostrar según el grupo del usuario
-  const showAdminLinks = userInfo && (isInGroup('Administrador') || isInGroup('Gerente'));
+  const showAdminLinks = userInfo && (isInGroup('Administrador'));
+  const showControlLinks = userInfo && (isInGroup('Administrador') || isInGroup('Gerente'));
   const showPedidosLinks = userInfo && (isInGroup('Administrador') || isInGroup('Gerente') || isInGroup('Mesero'));
-  const showCocinaLinks = userInfo && (isInGroup('Administrador') || isInGroup('Cocinero'));
-  
+  const showCocinaLinks = userInfo && isInGroup('Cocinero');
+
+
+  const mainRoute = userInfo
+    ? isInGroup('Administrador')
+      ? '/admin/dashboard'
+      : isInGroup('Gerente')
+        ? '/gerente/dashboard'
+        : isInGroup('Mesero')
+          ? '/mesero/dashboard'
+          : isInGroup('Cocinero')
+            ? '/cocinero/dashboard'
+            : '/dashboard'
+    : '/dashboard';
+
+
   return (
     <nav className="bg-blue-600 text-white shadow-md">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/dashboard" className="text-xl font-bold">
+            <Link href={mainRoute} className="text-xl font-bold">
               Restaurante App
             </Link>
-            
+
             <div className="ml-10 flex items-center space-x-4">
-              <Link href="/dashboard" className="hover:bg-blue-700 px-3 py-2 rounded-md">
-                Dashboard
-              </Link>
-              
-              {showPedidosLinks && (
-                <Link href="/pedidos" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+              {showAdminLinks && (
+                <Link href="/admin/pedidos" className="hover:bg-blue-700 px-3 py-2 rounded-md">
                   Pedidos
                 </Link>
               )}
-              
+
               {showAdminLinks && (
-                <Link href="/menu-items" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                <Link href="/admin/usuarios" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Usuarios
+                </Link>
+              )}
+
+              {showAdminLinks && (
+                <Link href="/admin/mesasestados" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Mesas/Estados
+                </Link>
+              )}
+
+              {showAdminLinks && (
+                <Link href="/admin/menu" className="hover:bg-blue-700 px-3 py-2 rounded-md">
                   Menú
                 </Link>
               )}
-              
+
+              {showAdminLinks && (
+                <Link href="/admin/componentes" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Componentes
+                </Link>
+              )}
+
               {showCocinaLinks && (
                 <Link href="/cocina" className="hover:bg-blue-700 px-3 py-2 rounded-md">
                   Cocina
                 </Link>
               )}
-              
-              {userInfo && isInGroup('Administrador') && (
-                <Link href="/admin" className="hover:bg-blue-700 px-3 py-2 rounded-md">
-                  Administración
-                </Link>
-              )}
+
             </div>
           </div>
-          
+
           <div className="flex items-center">
             {userInfo && (
               <div className="flex items-center">

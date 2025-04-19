@@ -68,16 +68,26 @@ class ComponenteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class MenuItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MenuItem
-        fields = '__all__'
-
-class MenuItemDetailSerializer(serializers.ModelSerializer):
-    componentes = ComponenteSerializer(many=True, read_only=True)
+    # Add a string representation
+    nombre_completo = serializers.SerializerMethodField()
     
     class Meta:
         model = MenuItem
         fields = '__all__'
+    
+    def get_nombre_completo(self, obj):
+        return f"{obj.nombre} - ${obj.precio}"
+
+class MenuItemDetailSerializer(serializers.ModelSerializer):
+    componentes = ComponenteSerializer(many=True, read_only=True)
+    nombre_completo = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = MenuItem
+        fields = '__all__'
+    
+    def get_nombre_completo(self, obj):
+        return f"{obj.nombre} - ${obj.precio}"
 
 class EstadoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -100,7 +110,7 @@ class OrdenSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class OrdenDetailSerializer(serializers.ModelSerializer):
-    menu_item = MenuItemSerializer(read_only=True)
+    menu_item = MenuItemDetailSerializer(read_only=True)
     estado = EstadoSerializer(read_only=True)
     
     class Meta:

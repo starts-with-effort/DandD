@@ -62,9 +62,20 @@ class MenuItemViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, DjangoModelPermissions]
     
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return MenuItemDetailSerializer
-        return MenuItemSerializer
+        # Always return the detail serializer to include componentes
+        return MenuItemDetailSerializer
+    
+    # Ensure consistent response format for list
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    # Ensure proper data format for single item
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
     
     @action(detail=True, methods=['post'])
     def add_componente(self, request, pk=None):

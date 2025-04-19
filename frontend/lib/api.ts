@@ -153,7 +153,7 @@ export interface Pedido {
 
 // Funciones genéricas CRUD actualizadas con el prefijo
 const fetchAll = async <T>(endpoint: string): Promise<T[]> => {
-  const url = `${API_PREFIX}${endpoint}`;
+  const url = endpoint.startsWith('/') ? `${API_PREFIX}${endpoint}` : `${API_PREFIX}/${endpoint}`;
   console.log('Fetching from:', API_URL + url);
   try {
     const response = await api.get<T[]>(url);
@@ -165,22 +165,31 @@ const fetchAll = async <T>(endpoint: string): Promise<T[]> => {
 };
 
 const fetchOne = async <T>(endpoint: string, id: string): Promise<T> => {
-  const response = await api.get<T>(`${API_PREFIX}${endpoint}/${id}/`);
+  const url = endpoint.startsWith('/') ? `${API_PREFIX}${endpoint}` : `${API_PREFIX}/${endpoint}`;
+  const response = await api.get<T>(`${url}/${id}/`);
   return response.data;
 };
 
 const create = async <T>(endpoint: string, data: any): Promise<T> => {
-  const response = await api.post<T>(`${API_PREFIX}${endpoint}/`, data);
+  const url = endpoint.startsWith('/') ? `${API_PREFIX}${endpoint}` : `${API_PREFIX}/${endpoint}`;
+  // Asegurarse de que la URL termine con una barra inclinada
+  const formattedUrl = url.endsWith('/') ? url : `${url}/`;
+  console.log("Creating at:", formattedUrl, "with data:", data);
+  const response = await api.post<T>(formattedUrl, data);
   return response.data;
 };
 
 const update = async <T>(endpoint: string, id: string, data: any): Promise<T> => {
-  const response = await api.put<T>(`${API_PREFIX}${endpoint}/${id}/`, data);
+  const url = endpoint.startsWith('/') ? `${API_PREFIX}${endpoint}` : `${API_PREFIX}/${endpoint}`;
+  // Asegurarse de que la URL termine con una barra inclinada después del ID
+  const response = await api.put<T>(`${url}/${id}/`, data);
   return response.data;
 };
 
 const remove = async (endpoint: string, id: string): Promise<void> => {
-  await api.delete(`${API_PREFIX}${endpoint}/${id}/`);
+  const url = endpoint.startsWith('/') ? `${API_PREFIX}${endpoint}` : `${API_PREFIX}/${endpoint}`;
+  // Asegurarse de que la URL termine con una barra inclinada después del ID
+  await api.delete(`${url}/${id}/`);
 };
 
 // API específica para cada modelo
@@ -207,7 +216,7 @@ export const menuItemsApi = {
 export const estadosApi = {
   getAll: () => fetchAll<Estado>('/estados'),
   getOne: (id: string) => fetchOne<Estado>('/estados', id),
-  create: (data: Partial<Estado>) => create<Estado>('/estados/', data),
+  create: (data: Partial<Estado>) => create<Estado>('/estados', data),
   update: (id: string, data: Partial<Estado>) => update<Estado>('/estados', id, data),
   delete: (id: string) => remove('/estados', id)
 };
@@ -215,7 +224,7 @@ export const estadosApi = {
 export const mesasApi = {
   getAll: () => fetchAll<Mesa>('/mesas'),
   getOne: (id: string) => fetchOne<Mesa>('/mesas', id),
-  create: (data: Partial<Mesa>) => create<Mesa>('/mesas/', data),
+  create: (data: Partial<Mesa>) => create<Mesa>('/mesas', data),
   update: (id: string, data: Partial<Mesa>) => update<Mesa>('/mesas', id, data),
   delete: (id: string) => remove('/mesas', id)
 };

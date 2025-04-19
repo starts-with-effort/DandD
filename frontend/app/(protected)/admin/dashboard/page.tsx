@@ -17,10 +17,10 @@ export default function AdminDashboard() {
   return (
     <ProtectedRoute allowedGroups={['Administrador']}>
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Panel de Administración</h1>
+        <h1 className="text-3xl font-bold mb-6 text-gray-700">Panel de Administración</h1>
         
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-semibold mb-4">Bienvenido, Administrador</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-gray-700">Bienvenido, Administrador</h2>
           <p className="text-gray-600">
             Desde aquí puedes gestionar todos los aspectos del sistema.
           </p>
@@ -28,7 +28,7 @@ export default function AdminDashboard() {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold mb-2">Gestión de Usuarios</h3>
+            <h3 className="text-xl font-semibold mb-2 text-gray-700">Gestión de Usuarios</h3>
             <p className="text-gray-600 mb-4">Administrar usuarios y roles del sistema</p>
             <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
               Acceder
@@ -36,7 +36,7 @@ export default function AdminDashboard() {
           </div>
           
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold mb-2">Reportes</h3>
+            <h3 className="text-xl font-semibold mb-2 text-gray-700">Reportes</h3>
             <p className="text-gray-600 mb-4">Ver estadísticas y generar reportes</p>
             <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
               Acceder
@@ -44,7 +44,7 @@ export default function AdminDashboard() {
           </div>
           
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-semibold mb-2">Configuración</h3>
+            <h3 className="text-xl font-semibold mb-2 text-gray-700">Configuración</h3>
             <p className="text-gray-600 mb-4">Personalizar la configuración del sistema</p>
             <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
               Acceder

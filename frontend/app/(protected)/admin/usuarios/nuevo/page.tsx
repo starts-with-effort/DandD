@@ -113,7 +113,7 @@ export default function CreateUserPage() {
     <ProtectedRoute allowedGroups={['Administrador']}>
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Crear Nuevo Usuario</h1>
+          <h1 className="text-3xl font-bold text-gray-800">Crear Nuevo Usuario</h1>
           <Link 
             href="/admin/usuarios" 
             className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
@@ -145,7 +145,7 @@ export default function CreateUserPage() {
                 <input
                   id="username"
                   type="text"
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-600"
                   {...register('username', { 
                     required: 'El nombre de usuario es requerido',
                     minLength: { value: 3, message: 'El nombre debe tener al menos 3 caracteres' }
@@ -164,7 +164,7 @@ export default function CreateUserPage() {
                 <input
                   id="email"
                   type="email"
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500  text-gray-600"
                   {...register('email', { 
                     required: 'El correo electrónico es requerido',
                     pattern: {
@@ -186,7 +186,7 @@ export default function CreateUserPage() {
                 <input
                   id="password"
                   type="password"
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500  text-gray-600"
                   {...register('password', { 
                     required: 'La contraseña es requerida',
                     minLength: { value: 8, message: 'La contraseña debe tener al menos 8 caracteres' }
@@ -205,7 +205,7 @@ export default function CreateUserPage() {
                 <input
                   id="password_confirm"
                   type="password"
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500  text-gray-600"
                   {...register('password_confirm', { 
                     required: 'Debe confirmar la contraseña',
                     validate: value => 
@@ -225,7 +225,7 @@ export default function CreateUserPage() {
                 <input
                   id="first_name"
                   type="text"
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-600"
                   {...register('first_name')}
                 />
               </div>
@@ -238,7 +238,7 @@ export default function CreateUserPage() {
                 <input
                   id="last_name"
                   type="text"
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-600"
                   {...register('last_name')}
                 />
               </div>
