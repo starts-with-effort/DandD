@@ -46,7 +46,7 @@ class Command(BaseCommand):
                 Estado: ['view'],
                 Mesa: ['view'],
                 Cliente: ['view'],
-                Pedido: ['add', 'change', 'view'],
+                Pedido: ['add', 'change', 'view', 'delete'],
                 Orden: ['add', 'change', 'delete', 'view'],
             },
             'Cocinero': {

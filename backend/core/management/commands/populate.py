@@ -52,39 +52,4 @@ class Command(BaseCommand):
         ]
         self.stdout.write(self.style.SUCCESS(f"Created {len(clientes)} clientes"))
 
-        # Crear usuario (asegúrate de tener un modelo de usuario configurado)
-        User = get_user_model()
-        usuario = User.objects.get_or_create(
-            username="admin",
-            defaults={
-                'first_name': 'Admin',
-                'last_name': 'User',
-                'email': 'admin@example.com'}
-        )
-
-        # Crear pedidos y órdenes
-        pedido = Pedido.objects.create(
-            usuario=usuario,
-            mesa=mesas[0],
-            cliente=clientes[0],
-            subtotal=0,
-            total=0
-        )
-        ordenes = [
-            Orden.objects.create(
-                pedido=pedido,
-                menu_item=menu_items[0],
-                estado=estados[0],
-                anotacion="Sin cebolla"
-            ),
-            Orden.objects.create(
-                pedido=pedido,
-                menu_item=menu_items[1],
-                estado=estados[1],
-                anotacion="Sin aderezo"
-            ),
-        ]
-        pedido.calcular_total()
-        self.stdout.write(self.style.SUCCESS(f"Created 1 pedido with {len(ordenes)} ordenes"))
-
         self.stdout.write(self.style.SUCCESS("Database populated successfully!"))

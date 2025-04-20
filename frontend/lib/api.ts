@@ -107,7 +107,7 @@ export interface MenuItem {
   id: string;
   nombre: string;
   precio: number;
-  descripcion: string;
+  descripcion?: string;
   componentes?: Componente[];
 }
 
@@ -239,7 +239,6 @@ export const clientesApi = {
 
 export const pedidosApi = {
   getAll: () => fetchAll<Pedido>('/pedidos'),
-  getMine: () => api.get<Pedido[]>(`${API_PREFIX}/pedidos/mis_pedidos/`).then(res => res.data),
   getOne: (id: string) => fetchOne<Pedido>('/pedidos', id),
   create: (data: Partial<Pedido>) => create<Pedido>('/pedidos/', data),
   update: (id: string, data: Partial<Pedido>) => update<Pedido>('/pedidos', id, data),
@@ -255,6 +254,78 @@ export const ordenesApi = {
   delete: (id: string) => remove('/ordenes', id),
   cambiarEstado: (id: string, estadoId: string) => 
     api.post(`${API_PREFIX}/ordenes/${id}/cambiar_estado/`, { estado_id: estadoId }).then(res => res.data)
+};
+
+// Interfaces para el dashboard
+export interface VentasPorPeriodo {
+  periodo: string;
+  total_ventas: number;
+  cantidad_pedidos: number;
+}
+
+export interface VentasResumen {
+  total_ventas: number;
+  cantidad_pedidos: number;
+  ticket_promedio: number;
+  tendencia: number;
+}
+
+export interface ProductoPopular {
+  id: string;
+  nombre: string;
+  veces_ordenado: number;
+  total_ventas: number;
+}
+
+export interface RendimientoUsuario {
+  id: number;
+  username: string;
+  nombre: string;
+  total_ventas: number;
+  pedidos_atendidos: number;
+}
+
+export interface DashboardVentasResponse {
+  ventas: VentasPorPeriodo[];
+  resumen: VentasResumen;
+}
+
+export interface DashboardProductosResponse {
+  productos_populares: ProductoPopular[];
+}
+
+export interface DashboardUsuariosResponse {
+  usuarios_rendimiento: RendimientoUsuario[];
+}
+
+// API para el dashboard
+export const dashboardApi = {
+  getVentas: (periodo: string = 'semana') => 
+    api.get<DashboardVentasResponse>(`${API_PREFIX}/dashboard/ventas/?periodo=${periodo}`)
+      .then(res => res.data),
+  
+  getProductos: (periodo: string = 'semana') => 
+    api.get<DashboardProductosResponse>(`${API_PREFIX}/dashboard/productos/?periodo=${periodo}`)
+      .then(res => res.data),
+  
+  getUsuarios: (periodo: string = 'semana') => 
+    api.get<DashboardUsuariosResponse>(`${API_PREFIX}/dashboard/usuarios/?periodo=${periodo}`)
+      .then(res => res.data),
+  
+  // Método de conveniencia para obtener todos los datos a la vez
+  getAll: async (periodo: string = 'semana') => {
+    const [ventas, productos, usuarios] = await Promise.all([
+      dashboardApi.getVentas(periodo),
+      dashboardApi.getProductos(periodo),
+      dashboardApi.getUsuarios(periodo)
+    ]);
+    
+    return {
+      ventas,
+      productos,
+      usuarios
+    };
+  }
 };
 
 export default api;

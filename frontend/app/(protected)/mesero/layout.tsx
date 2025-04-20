@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { isAuthenticated } from '@/lib/auth';
-import Navbar from '@/app/components/ui/NavBar';
 
 export default function ProtectedLayout({
   children,
@@ -32,7 +31,6 @@ export default function ProtectedLayout({
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8">
         {children}
       </main>

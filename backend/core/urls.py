@@ -1,5 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from .views import DashboardVentasAPI, DashboardProductosAPI, DashboardUsuariosAPI
 from .views import (
     UserViewSet,
     GroupViewSet,
@@ -26,4 +27,7 @@ router.register(r'ordenes', OrdenViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('users/me/', UserViewSet.as_view({'get': 'me'}), name='user-info'),
+    path('dashboard/ventas/', DashboardVentasAPI.as_view(), name='dashboard-ventas'),
+    path('dashboard/productos/', DashboardProductosAPI.as_view(), name='dashboard-productos'),
+    path('dashboard/usuarios/', DashboardUsuariosAPI.as_view(), name='dashboard-usuarios'),
 ]

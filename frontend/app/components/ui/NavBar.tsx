@@ -15,20 +15,13 @@ export default function Navbar() {
 
   // Determinar qué enlaces mostrar según el grupo del usuario
   const showAdminLinks = userInfo && (isInGroup('Administrador'));
-  const showControlLinks = userInfo && (isInGroup('Administrador') || isInGroup('Gerente'));
-  const showPedidosLinks = userInfo && (isInGroup('Administrador') || isInGroup('Gerente') || isInGroup('Mesero'));
-  const showCocinaLinks = userInfo && isInGroup('Cocinero');
-
+  const showGerenteLinks = userInfo && isInGroup('Gerente');
 
   const mainRoute = userInfo
     ? isInGroup('Administrador')
       ? '/admin/dashboard'
       : isInGroup('Gerente')
         ? '/gerente/dashboard'
-        : isInGroup('Mesero')
-          ? '/mesero/dashboard'
-          : isInGroup('Cocinero')
-            ? '/cocinero/dashboard'
             : '/dashboard'
     : '/dashboard';
 
@@ -73,12 +66,30 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {showCocinaLinks && (
-                <Link href="/cocina" className="hover:bg-blue-700 px-3 py-2 rounded-md">
-                  Cocina
+              {showGerenteLinks && (
+                <Link href="/gerente/componentes" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Dahsboard
                 </Link>
               )}
 
+              {showGerenteLinks && (
+                <Link href="/gerente/menu" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Menu
+                </Link>
+              )}
+
+              {showGerenteLinks && (
+                <Link href="/gerente/pedidos" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Pedidos
+                </Link>
+              )}
+
+              {showGerenteLinks && (
+                <Link href="/gerente/componentes" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Componentes
+                </Link>
+              )}
+              
             </div>
           </div>
 
