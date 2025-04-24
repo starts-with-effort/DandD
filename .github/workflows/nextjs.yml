@@ -1,0 +1,49 @@
+name: Deploy Next.js site to Pages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-test:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Build frontend container
+        run: |
+          docker compose -f docker-compose.yml build frontend
+          
+      - name: Run tests
+        run: |
+          docker compose -f docker-compose.yml run --rm frontend npm test
+        
+  deploy:
+    needs: build-and-test
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Deploy frontend service
+        run: |
+          # Parar los contenedores existentes si están en ejecución
+          docker compose -f docker-compose.yml down frontend
+          
+          # Construir la nueva imagen
+          docker compose -f docker-compose.yml build frontend
+          
+          # Iniciar el servicio en modo detached
+          docker compose -f docker-compose.yml up -d frontend
+          
+          # Opcional: Limpieza de imágenes antiguas
+          docker image prune -f

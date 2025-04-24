@@ -1,15 +1,16 @@
 from django.db import models
 from django.conf import settings
+import uuid
 
 class Componente(models.Model):
-    id = models.CharField(max_length=10, primary_key=True)
+    id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50)
 
     def __str__(self):
         return self.nombre
 
 class MenuItem(models.Model):
-    id = models.CharField(max_length=10, primary_key=True)
+    id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50)
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     descripcion = models.CharField(max_length=100)
@@ -24,21 +25,21 @@ class MenuItem(models.Model):
         return self.nombre
 
 class Estado(models.Model):
-    id = models.CharField(max_length=5, primary_key=True)
+    id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=30)
 
     def __str__(self):
         return self.nombre
 
 class Mesa(models.Model):
-    id = models.CharField(max_length=5, primary_key=True)
+    id = models.AutoField(primary_key=True)
     numero = models.IntegerField()
 
     def __str__(self):
         return f"Mesa {self.numero}"
 
 class Cliente(models.Model):
-    id = models.CharField(max_length=10, primary_key=True)
+    id = models.AutoField(primary_key=True)
     documento = models.CharField(max_length=15)
     nombre = models.CharField(max_length=60)
     celular = models.CharField(max_length=15)
@@ -47,7 +48,7 @@ class Cliente(models.Model):
         return self.nombre
 
 class Pedido(models.Model):
-    id = models.CharField(max_length=10, primary_key=True)
+    id = models.AutoField(primary_key=True)
     hora_creacion = models.TimeField(auto_now_add=True)
     hora_pago = models.TimeField(null=True, blank=True)
     fecha_creacion = models.DateField(auto_now_add=True)
@@ -69,7 +70,7 @@ class Pedido(models.Model):
         self.save()
 
 class Orden(models.Model):
-    id = models.CharField(max_length=10, primary_key=True)
+    id = models.AutoField(primary_key=True)
     hora_creacion = models.TimeField(auto_now_add=True)
     hora_entrega = models.TimeField(null=True, blank=True)
     anotacion = models.CharField(max_length=100, blank=True, null=True)

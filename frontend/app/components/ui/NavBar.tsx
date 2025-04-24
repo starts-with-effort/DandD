@@ -7,57 +7,92 @@ import { getUserInfo, logout, isInGroup } from '@/lib/auth';
 export default function Navbar() {
   const router = useRouter();
   const userInfo = getUserInfo();
-  
+
   const handleLogout = () => {
     logout();
     router.push('/auth/login');
   };
 
   // Determinar qué enlaces mostrar según el grupo del usuario
-  const showAdminLinks = userInfo && (isInGroup('Administrador') || isInGroup('Gerente'));
-  const showPedidosLinks = userInfo && (isInGroup('Administrador') || isInGroup('Gerente') || isInGroup('Mesero'));
-  const showCocinaLinks = userInfo && (isInGroup('Administrador') || isInGroup('Cocinero'));
-  
+  const showAdminLinks = userInfo && (isInGroup('Administrador'));
+  const showGerenteLinks = userInfo && isInGroup('Gerente');
+
+  const mainRoute = userInfo
+    ? isInGroup('Administrador')
+      ? '/admin/dashboard'
+      : isInGroup('Gerente')
+        ? '/gerente/dashboard'
+            : '/dashboard'
+    : '/dashboard';
+
+
   return (
     <nav className="bg-blue-600 text-white shadow-md">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link href="/dashboard" className="text-xl font-bold">
+            <Link href={mainRoute} className="text-xl font-bold">
               Restaurante App
             </Link>
-            
+
             <div className="ml-10 flex items-center space-x-4">
-              <Link href="/dashboard" className="hover:bg-blue-700 px-3 py-2 rounded-md">
-                Dashboard
-              </Link>
-              
-              {showPedidosLinks && (
-                <Link href="/pedidos" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+              {showAdminLinks && (
+                <Link href="/admin/pedidos" className="hover:bg-blue-700 px-3 py-2 rounded-md">
                   Pedidos
                 </Link>
               )}
-              
+
               {showAdminLinks && (
-                <Link href="/menu-items" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                <Link href="/admin/usuarios" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Usuarios
+                </Link>
+              )}
+
+              {showAdminLinks && (
+                <Link href="/admin/mesasestados" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Mesas/Estados
+                </Link>
+              )}
+
+              {showAdminLinks && (
+                <Link href="/admin/menu" className="hover:bg-blue-700 px-3 py-2 rounded-md">
                   Menú
                 </Link>
               )}
-              
-              {showCocinaLinks && (
-                <Link href="/cocina" className="hover:bg-blue-700 px-3 py-2 rounded-md">
-                  Cocina
+
+              {showAdminLinks && (
+                <Link href="/admin/componentes" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Componentes
+                </Link>
+              )}
+
+              {showGerenteLinks && (
+                <Link href="/gerente/componentes" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Dahsboard
+                </Link>
+              )}
+
+              {showGerenteLinks && (
+                <Link href="/gerente/menu" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Menu
+                </Link>
+              )}
+
+              {showGerenteLinks && (
+                <Link href="/gerente/pedidos" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Pedidos
+                </Link>
+              )}
+
+              {showGerenteLinks && (
+                <Link href="/gerente/componentes" className="hover:bg-blue-700 px-3 py-2 rounded-md">
+                  Componentes
                 </Link>
               )}
               
-              {userInfo && isInGroup('Administrador') && (
-                <Link href="/admin" className="hover:bg-blue-700 px-3 py-2 rounded-md">
-                  Administración
-                </Link>
-              )}
             </div>
           </div>
-          
+
           <div className="flex items-center">
             {userInfo && (
               <div className="flex items-center">

@@ -1,0 +1,58 @@
+# Especifica la versión de la sintaxis de Docker Compose
+version: '2.35.1'
+
+services:
+  # Servicio para el backend Django
+  backend:
+    # Construye la imagen usando el Dockerfile en el directorio ./backend
+    build: ./backend
+    # Nombre del contenedor (opcional, pero útil para referencias)
+    container_name: django_backend
+    # Reinicia el contenedor automáticamente si falla
+    restart: unless-stopped
+    # Mapea el puerto 8000 del host al puerto 8000 del contenedor.
+    # Si usas Nginx, podrías no necesitar exponer este puerto directamente al host.
+    ports:
+      - "8000:8000"
+    # Carga variables de entorno desde un archivo .env en el directorio backend.
+    # ¡Asegúrate de que este archivo esté en .gitignore!
+    #env_file:
+    #  - ./backend/.env
+    # (Opcional) Define volúmenes si necesitas persistencia de datos (ej. media files)
+    # volumes:
+    #   - ./backend/media:/app/media
+
+  # Servicio para el frontend Next.js
+  frontend:
+    # Construye la imagen usando el Dockerfile en el directorio ./frontend
+    build: ./frontend
+    container_name: nextjs_frontend
+    restart: unless-stopped
+    ports:
+      # Mapea el puerto 3000 del host al puerto 3000 del contenedor.
+      # Si usas Nginx, podrías no necesitar exponer este puerto directamente al host.
+      - "3000:3000"
+    env_file:
+      - ./frontend/.env.local # O el nombre de tu archivo de entorno para Next.js
+    # Depende del backend si necesita que esté listo antes (raro para frontend)
+    depends_on:
+      - backend
+
+# (Opcional, pero recomendado) Servicio Nginx como Reverse Proxy
+# nginx:
+#   image: nginx:alpine # Usa una imagen ligera de Nginx
+#   container_name: nginx_proxy
+#   restart: unless-stopped
+#   ports:
+#     - "80:80"   # Expone el puerto 80 del host
+#     - "443:443" # Expone el puerto 443 del host (para HTTPS)
+#   volumes:
+#     # Monta tu archivo de configuración de Nginx (lo crearías en la raíz del repo)
+#     - ./nginx.conf:/etc/nginx/nginx.conf:ro # ':ro' = read-only
+#     # (Opcional) Volúmenes para certificados SSL (ej. Let's Encrypt)
+#     # - ./data/certbot/conf:/etc/letsencrypt
+#     # - ./data/certbot/www:/var/www/certbot
+#   depends_on:
+#     # Asegura que Nginx inicie después de los servicios de backend y frontend
+#     - backend
+#     - frontend

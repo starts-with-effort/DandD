@@ -1,0 +1,38 @@
+name: Django CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build and run tests
+      run: |
+        docker compose -f docker-compose.yml build backend
+        docker compose -f docker-compose.yml run --rm backend python manage.py test
+    
+  deploy:
+    needs: test
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy backend service
+      run: |
+        # Parar los contenedores existentes si están en ejecución
+        docker compose -f docker-compose.yml down backend
+        
+        # Construir la nueva imagen
+        docker compose -f docker-compose.yml build backend
+        
+        # Ejecutar migraciones
+        docker compose -f docker-compose.yml run --rm backend python manage.py migrate
+        
+        # Iniciar el servicio en modo detached
+        docker compose -f docker-compose.yml up -d backend
+        
+        # Opcional: Limpieza de imágenes antiguas
+        docker image prune -f

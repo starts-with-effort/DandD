@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from core.models import Componente, MenuItem, Estado, Mesa, Cliente, Pedido, Orden
+from django.contrib.auth.models import User
 
 class Command(BaseCommand):
     help = 'Configura los grupos y permisos para la aplicación'
@@ -45,7 +46,7 @@ class Command(BaseCommand):
                 Estado: ['view'],
                 Mesa: ['view'],
                 Cliente: ['view'],
-                Pedido: ['add', 'change', 'view'],
+                Pedido: ['add', 'change', 'view', 'delete'],
                 Orden: ['add', 'change', 'delete', 'view'],
             },
             'Cocinero': {

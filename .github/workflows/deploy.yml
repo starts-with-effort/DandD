@@ -1,0 +1,56 @@
+# Nombre del flujo de trabajo (aparecerá en la pestaña Actions de GitHub)
+name: Deploy to EC2
+
+# Define cuándo se debe ejecutar este flujo de trabajo
+on:
+  push:
+    # Se ejecuta solo cuando hay un push a la rama 'main'
+    branches:
+      - main
+  pull_request:
+    branches: [ "main" ]
+
+# Define los trabajos (jobs) que se ejecutarán
+jobs:
+  # Nombre del trabajo (puedes llamarlo como quieras)
+  deploy:
+    # Nombre descriptivo para el trabajo (opcional)
+    name: Build and Deploy Application
+    # Especifica que este trabajo debe ejecutarse en un runner auto-hospedado.
+    # GitHub buscará un runner disponible con la etiqueta 'self-hosted' (por defecto)
+    # y 'linux' y 'x64' (si las añadiste durante la configuración del runner).
+    runs-on: self-hosted
+
+    # Pasos que se ejecutarán secuencialmente en el runner
+    steps:
+      # Paso 1: Descargar el código del repositorio
+      # Usa una acción predefinida de GitHub para hacer checkout del código.
+      - name: Checkout code
+        # actions/checkout@v3 es una versión específica de la acción.
+        uses: actions/checkout@v3
+
+      # Paso 2: Detener contenedores existentes (si los hay) y construir/iniciar los nuevos
+      # 'run' ejecuta comandos de shell en el runner.
+      - name: Build and Deploy with Docker Compose
+        run: |
+          # Detiene y elimina los contenedores, redes y volúmenes definidos en docker-compose.yml
+          # El comando 'down' es importante para asegurarse de que no haya conflictos.
+          docker-compose down
+
+          # Construye (o reconstruye) las imágenes para todos los servicios en docker-compose.yml
+          # --no-cache: Asegura que se reconstruya todo desde cero, ignorando el caché de Docker.
+          # Es útil para asegurar que los últimos cambios del código se incluyan,
+          # aunque puede hacer la construcción más lenta. Quítalo si prefieres usar el caché.
+          docker-compose build --no-cache
+
+          # Crea e inicia los contenedores en segundo plano (-d significa 'detached').
+          # Usará las imágenes recién construidas.
+          docker-compose up -d
+
+      # (Opcional) Paso 3: Limpiar imágenes Docker antiguas no utilizadas
+      - name: Prune old Docker images
+        run: |
+          # Elimina todas las imágenes Docker que no estén asociadas a ningún contenedor.
+          # -a: Elimina todas las imágenes no usadas, no solo las 'dangling'.
+          # -f: Fuerza la eliminación sin pedir confirmación.
+          docker image prune -af
