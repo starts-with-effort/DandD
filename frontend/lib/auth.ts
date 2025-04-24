@@ -4,8 +4,8 @@ import { jwtDecode } from 'jwt-decode';
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface LoginCredentials {
-  username: string;
-  password: string;
+  nombre_de_usuario: string;
+  contraseña: string;
 }
 
 interface AuthTokens {
@@ -31,27 +31,22 @@ interface UserInfo {
 
 export const login = async (credentials: LoginCredentials): Promise<boolean> => {
   try {
-    // Obtener tokens JWT
     const response = await axios.post(`${API_URL}api/token/`, credentials);
     const tokens: AuthTokens = response.data;
-    
-    // Almacenar tokens en localStorage
+
     localStorage.setItem('accessToken', tokens.access);
     localStorage.setItem('refreshToken', tokens.refresh);
-    
-    // Obtener información del usuario incluyendo grupos
+
     const userInfoResponse = await axios.get(`${API_URL}core/users/me/`, {
       headers: {
-        Authorization: `Bearer ${tokens.access}`
-      }
+        Authorization: `Bearer ${tokens.access}`,
+      },
     });
-    
-    // Guardar la información completa del usuario
+
     localStorage.setItem('userInfo', JSON.stringify(userInfoResponse.data));
-    
     return true;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('Error de inicio de sesión:', error);
     return false;
   }
 };
@@ -64,45 +59,40 @@ export const logout = (): void => {
 
 export const refreshToken = async (): Promise<string | null> => {
   const refreshTokenValue = localStorage.getItem('refreshToken');
-  
   if (!refreshTokenValue) {
+    logout();
     return null;
   }
-  
+
   try {
     const response = await axios.post(`${API_URL}api/token/refresh/`, {
-      refresh: refreshTokenValue
+      refresh: refreshTokenValue,
     });
-    
     const newAccessToken = response.data.access;
     localStorage.setItem('accessToken', newAccessToken);
-    
     return newAccessToken;
   } catch (error) {
-    console.error('Token refresh error:', error);
+    console.error('Error al refrescar token:', error);
     logout();
     return null;
   }
 };
 
-export const isAuthenticated = (): boolean => {
+export const isAuthenticated = async (): Promise<boolean> => {
   const accessToken = localStorage.getItem('accessToken');
-  
   if (!accessToken) {
     return false;
   }
-  
+
   try {
     const decoded: UserData = jwtDecode(accessToken);
     const currentTime = Date.now() / 1000;
-    
-    // Verificar si el token ha expirado
+
     if (decoded.exp < currentTime) {
-      // Intentar renovar en segundo plano, pero devolver false por ahora
-      refreshToken();
+      await refreshToken(); // intenta refrescar en segundo plano
       return false;
     }
-    
+
     return true;
   } catch (error) {
     return false;
@@ -110,22 +100,20 @@ export const isAuthenticated = (): boolean => {
 };
 
 export const getUserInfo = (): UserInfo | null => {
-  // Primero intentamos obtener la información completa del usuario
   const userInfoString = localStorage.getItem('userInfo');
   if (userInfoString) {
     try {
       return JSON.parse(userInfoString);
     } catch (error) {
-      console.error('Error parsing user info:', error);
+      console.error('Error al analizar la información del usuario:', error);
     }
   }
-  
-  // Si no hay información completa, intentamos extraer datos básicos del token
+
   const accessToken = localStorage.getItem('accessToken');
   if (!accessToken) {
     return null;
   }
-  
+
   try {
     const decoded: UserData = jwtDecode(accessToken);
     return {
@@ -135,10 +123,10 @@ export const getUserInfo = (): UserInfo | null => {
       first_name: '',
       last_name: '',
       grupos: [],
-      permisos: []
+      permisos: [],
     };
   } catch (error) {
-    console.error('Error decoding token:', error);
+    console.error('Error al decodificar el token:', error);
     return null;
   }
 };
@@ -148,28 +136,27 @@ export const getUserGroups = (): string[] => {
   return userInfo?.grupos || [];
 };
 
-export const hasPermission = (permission: string): boolean => {
+export const hasPermission = (permiso: string): boolean => {
   const userInfo = getUserInfo();
-  return userInfo?.permisos?.includes(permission) || false;
+  return userInfo?.permisos?.includes(permiso) || false;
 };
 
-export const isInGroup = (group: string): boolean => {
-  const groups = getUserGroups();
-  return groups.includes(group);
+export const isInGroup = (grupo: string): boolean => {
+  const grupos = getUserGroups();
+  return grupos.includes(grupo);
 };
 
 export const getRedirectPath = (): string => {
-  const groups = getUserGroups();
-  
-  if (groups.includes('Administrador')) {
+  const grupos = getUserGroups();
+  if (grupos.includes('Administrador')) {
     return '/admin/dashboard';
-  } else if (groups.includes('Gerente')) {
+  } else if (grupos.includes('Gerente')) {
     return '/gerente/dashboard';
-  } else if (groups.includes('Mesero')) {
+  } else if (grupos.includes('Mesero')) {
     return '/mesero/dashboard';
-  } else if (groups.includes('Cocinero')) {
+  } else if (grupos.includes('Cocinero')) {
     return '/cocinero/dashboard';
   } else {
-    return '/unauthorized'; // Ruta por defecto
+    return '/no-autorizado';
   }
 };
