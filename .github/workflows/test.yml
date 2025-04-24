@@ -2,7 +2,6 @@ name: Run Jest Tests
 
 on:
   push:
-    # Agrega aquí todas las ramas desde las que quieras disparar la CI
     branches:
       - main
       - master
@@ -26,6 +25,8 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+          # Asegura que encuentra el lockfile dentro de `frontend`
+          cache-dependency-path: './frontend/**/package-lock.json'
 
       - name: 📦 Install dependencies
         working-directory: frontend
