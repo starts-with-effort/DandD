@@ -20,7 +20,7 @@ ENV NODE_ENV=production
 
 # Construye la aplicación Next.js para producción
 # Reemplaza 'build' si tu script de build se llama diferente en package.json
-RUN npm run build
+RUN npm run dev
 
 # ---- Etapa de Producción ----
 # Usa una imagen base ligera de Node.js para ejecutar la aplicación construida.
