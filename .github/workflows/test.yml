@@ -2,33 +2,35 @@ name: Run Jest Tests
 
 on:
   push:
+    # Agrega aquí todas las ramas desde las que quieras disparar la CI
     branches:
       - main
       - master
+      - test
   pull_request:
     branches:
       - main
       - master
+      - test
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout repository
         uses: actions/checkout@v3
 
-      - name: Use Node.js
+      - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+          cache: 'npm'
 
-      - name: Install dependencies
-        run: |
-          cd DandD/frontend
-          npm install
+      - name: 📦 Install dependencies
+        working-directory: frontend
+        run: npm ci
 
-      - name: Run tests
-        run: |
-          cd DandD/frontend
-          npm test
+      - name: 🧪 Run tests
+        working-directory: frontend
+        run: npm test
