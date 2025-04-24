@@ -1,6 +1,6 @@
 # Usa una imagen base oficial de Python. Elige la versión que usas en desarrollo.
 # '-slim' es una versión más ligera.
-FROM python:3.14.0a7-slim
+FROM python:3.12-slim
 
 # Establece variables de entorno para Python
 ENV PYTHONDONTWRITEBYTECODE 1 # Evita que Python escriba archivos .pyc
