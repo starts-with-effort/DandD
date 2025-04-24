@@ -36,7 +36,7 @@ services:
     depends_on:
       - backend
     environment:
-      - NEXT_PUBLIC_API_URL=http://56.124.67.132/ 
+      - NEXT_PUBLIC_API_URL=http://56.124.67.132:8000/ 
 
 # (Opcional, pero recomendado) Servicio Nginx como Reverse Proxy
 # nginx:
