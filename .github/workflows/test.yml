@@ -1,16 +1,7 @@
 name: Run Jest Tests
 
 on:
-  push:
-    branches:
-      - main
-      - master
-      - test
-  pull_request:
-    branches:
-      - main
-      - master
-      - test
+  workflow_dispatch:
 
 jobs:
   test:

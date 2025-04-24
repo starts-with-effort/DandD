@@ -1,0 +1,82 @@
+# Define el nombre del flujo de trabajo que aparecerá en la interfaz de GitHub Actions
+name: CI/CD Pipeline
+
+# Define los eventos que activarán este flujo de trabajo
+on:
+  # Se ejecuta cuando se hace push a la rama main
+  #push:
+  #  branches: [ "main" ]
+  # Se ejecuta cuando se crea un pull request hacia la rama main
+  #pull_request:
+  #  branches: [ "main" ]
+  # Permite la ejecución manual del flujo de trabajo desde la interfaz de GitHub
+  workflow_dispatch:
+
+# Define los trabajos que se ejecutarán en este flujo de trabajo
+jobs:
+  # Primer trabajo: detecta qué partes del código han cambiado
+  detect-changes:
+    # Especifica que este trabajo se ejecutará en un runner auto-hospedado
+    runs-on: self-hosted
+    # Define valores de salida que pueden ser utilizados por otros trabajos
+    outputs:
+      # Indicará si hubo cambios en el backend
+      backend: ${{ steps.filter.outputs.backend }}
+      # Indicará si hubo cambios en el frontend
+      frontend: ${{ steps.filter.outputs.frontend }}
+    # Pasos a ejecutar en este trabajo
+    steps:
+      # Descarga el código del repositorio usando la acción checkout
+      - uses: actions/checkout@v4
+      # Utiliza la acción dorny/paths-filter para detectar cambios en archivos específicos
+      - uses: dorny/paths-filter@v2
+        # Asigna un ID a este paso para poder referenciar sus salidas
+        id: filter
+        # Configuración de la acción
+        with:
+          # Define patrones de archivos para clasificar los cambios
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/workflows/django.yml'
+              - 'docker-compose.yml'
+              - 'Dockerfile.backend'
+            frontend:
+              - 'frontend/**'            
+              - '.github/workflows/nextjs.yml'
+              - 'docker-compose.yml'
+              - 'Dockerfile.frontend'
+
+  # Segundo trabajo: ejecuta workflows específicos basados en los cambios detectados
+  trigger-workflows:
+    # Indica que este trabajo depende de que termine el trabajo detect-changes
+    needs: detect-changes
+    # Especifica que este trabajo se ejecutará en un runner auto-hospedado
+    runs-on: self-hosted
+    # Pasos a ejecutar en este trabajo
+    steps:
+      # Si hubo cambios en el backend, ejecuta el workflow de Django CI
+      - name: Trigger Django CI
+        # Condición que determina si este paso debe ejecutarse
+        if: needs.detect-changes.outputs.backend == 'true'
+        # Utiliza la acción benc-uk/workflow-dispatch para activar otro workflow
+        uses: benc-uk/workflow-dispatch@v1
+        # Configuración de la acción
+        with:
+          # Nombre del workflow a activar
+          workflow: Django CI
+          # Token de autenticación para GitHub API
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Si hubo cambios en el frontend, ejecuta el workflow de Next.js
+      - name: Trigger Next.js CI
+        # Condición que determina si este paso debe ejecutarse
+        if: needs.detect-changes.outputs.frontend == 'true'
+        # Utiliza la acción benc-uk/workflow-dispatch para activar otro workflow
+        uses: benc-uk/workflow-dispatch@v1
+        # Configuración de la acción
+        with:
+          # Nombre del workflow a activar
+          workflow: Deploy Next.js site to Pages
+          # Token de autenticación para GitHub API
+          token: ${{ secrets.GITHUB_TOKEN }}
