@@ -32,11 +32,11 @@ services:
       # Mapea el puerto 3000 del host al puerto 3000 del contenedor.
       # Si usas Nginx, podrías no necesitar exponer este puerto directamente al host.
       - "3000:3000"
-    env_file:
-      - ./frontend/.env.local # O el nombre de tu archivo de entorno para Next.js
     # Depende del backend si necesita que esté listo antes (raro para frontend)
     depends_on:
       - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=/api/
 
 # (Opcional, pero recomendado) Servicio Nginx como Reverse Proxy
 # nginx:
