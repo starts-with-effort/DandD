@@ -46,4 +46,4 @@ EXPOSE 3000
 
 # Comando para iniciar la aplicación Next.js en modo producción
 # Reemplaza 'start' si tu script de inicio se llama diferente en package.json
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]
